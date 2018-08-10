@@ -1,7 +1,5 @@
 package ru.unisuite.synchronizer;
 
-import java.io.IOException;
-import java.io.Reader;
 import java.sql.Timestamp;
 
 public class SyncObject {

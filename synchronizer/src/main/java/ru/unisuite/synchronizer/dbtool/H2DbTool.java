@@ -57,13 +57,13 @@ public class H2DbTool implements DbTool {
 
 				resultSet.next();
 
-				Integer id = resultSet.getInt("id");
+				Integer id = resultSet.getInt(DbToolParamName.id);
 
-				String alias = resultSet.getString("alias");
+				String alias = resultSet.getString(DbToolParamName.alias);
 
-				Timestamp modificationDate = resultSet.getTimestamp("modification_date");
+				Timestamp modificationDate = resultSet.getTimestamp(DbToolParamName.modificationDate);
 
-				Reader reader = resultSet.getCharacterStream("clob");
+				Reader reader = resultSet.getCharacterStream(DbToolParamName.clob);
 
 				String clob = readToString(reader);
 
@@ -109,7 +109,7 @@ public class H2DbTool implements DbTool {
 
 				while (resultSet.next() != false) {
 					
-					array.add(resultSet.getString("alias"));
+					array.add(resultSet.getString(DbToolParamName.alias));
 					
 				}
 				
