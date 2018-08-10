@@ -4,14 +4,6 @@ import java.sql.Timestamp;
 
 public class SyncObject {
 
-	private Integer id;
-	
-	private String alias;
-	
-	private Timestamp timestamp;
-
-	private String clob;
-	
 	public SyncObject(Integer id, String alias, Timestamp timestamp, String clob) {
 		
 		this.id = id;
@@ -20,6 +12,14 @@ public class SyncObject {
 		this.clob = clob;
 		
 	}
+	
+	private Integer id;
+	
+	private String alias;
+	
+	private Timestamp timestamp;
+
+	private String clob;
 	
 	public Integer getId() {
 		return id;
