@@ -28,9 +28,7 @@ public class Synchronizer {
 	// ¬ качестве аргумента сначала приходит действие, которое необходимо выполнить,
 	// потом перечисление файлов.
 	// ≈сли список параметров пусть, выполн€етс€ полна€ синхронизаци€
-	public static void main(String args1[]) throws SQLException, IOException {
-
-		String[] args = { "download" };
+	public static void main(String args[]) throws SQLException, IOException {
 
 		if (args.length == 0) {
 			sync();
