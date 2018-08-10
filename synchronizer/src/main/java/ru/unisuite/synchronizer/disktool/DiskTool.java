@@ -31,7 +31,7 @@ public class DiskTool {
 		String fileFullPath = rootDirectory + File.separator + fileName;
 
 		File file = new File(fileFullPath);
-
+		
 		SyncObject syncObject = null;
 		
 		if (file.exists()) {

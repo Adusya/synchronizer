@@ -3,6 +3,7 @@ package ru.unisuite.synchronizer;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -29,7 +30,7 @@ public class Synchronizer {
 	// Если список параметров пусть, выполняется полная синхронизация
 	public static void main(String args1[]) throws SQLException, IOException {
 
-		String[] args = { "upload" };
+		String[] args = { "download" };
 
 		if (args.length == 0) {
 			sync();
@@ -98,6 +99,17 @@ public class Synchronizer {
 
 	private static void download(String args[]) throws SQLException, IOException {
 
+		if (args.length < 2) {
+			args = diskTool.getFullFileList();
+			
+			ArrayList<String> array = h2DbTool.getFullFileList();
+			
+			for (String fileName: array) {
+				saveFromDbToDisk(fileName);
+			}
+			
+		}
+		
 		for (int i = 1; i < args.length; i++) {
 			saveFromDbToDisk(args[i]);
 		}
