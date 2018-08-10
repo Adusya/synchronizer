@@ -1,11 +1,11 @@
-package ru.miit.synchronizer.DbTool;
+package ru.unisuite.synchronizer.dbtool;
 
 import java.io.IOException;
 import java.io.Reader;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import ru.miit.synchronizer.SyncObject;
+import ru.unisuite.synchronizer.SyncObject;
 
 public interface DbTool {
 	

@@ -1,4 +1,4 @@
-package ru.miit.synchronizer.DbTool;
+package ru.unisuite.synchronizer.dbtool;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -12,8 +12,8 @@ import java.sql.Timestamp;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import ru.miit.synchronizer.SyncObject;
-import ru.miit.synchronizer.Synchronizer;
+import ru.unisuite.synchronizer.SyncObject;
+import ru.unisuite.synchronizer.Synchronizer;
 
 public class H2DbTool implements DbTool {
 	

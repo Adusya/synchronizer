@@ -1,4 +1,4 @@
-package ru.miit.synchronizer;
+package ru.unisuite.synchronizer;
 
 import java.io.IOException;
 import java.io.Reader;

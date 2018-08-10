@@ -1,4 +1,4 @@
-package ru.miit.synchronizer.disktool;
+package ru.unisuite.synchronizer.disktool;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.sql.Timestamp;
 
-import ru.miit.synchronizer.SyncObject;
+import ru.unisuite.synchronizer.SyncObject;
 
 public class DiskTool {
 

@@ -1,4 +1,4 @@
-package ru.miit.synchronizer;
+package ru.unisuite.synchronizer;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -11,9 +11,9 @@ import com.google.diff_match_patch.diff_match_patch;
 import com.google.diff_match_patch.diff_match_patch.Diff;
 import com.google.diff_match_patch.diff_match_patch.Operation;
 
-import ru.miit.synchronizer.DbTool.DbTool;
-import ru.miit.synchronizer.DbTool.H2DbTool;
-import ru.miit.synchronizer.disktool.DiskTool;
+import ru.unisuite.synchronizer.dbtool.DbTool;
+import ru.unisuite.synchronizer.dbtool.H2DbTool;
+import ru.unisuite.synchronizer.disktool.DiskTool;
 
 public class Synchronizer {
 
