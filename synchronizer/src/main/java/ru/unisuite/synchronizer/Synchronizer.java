@@ -1,18 +1,12 @@
 package ru.unisuite.synchronizer;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.google.diff_match_patch.diff_match_patch;
-import com.google.diff_match_patch.diff_match_patch.Diff;
-import com.google.diff_match_patch.diff_match_patch.Operation;
-
 import ru.unisuite.synchronizer.dbtool.DbTool;
+import ru.unisuite.synchronizer.dbtool.DbToolProperties;
 import ru.unisuite.synchronizer.dbtool.H2DbTool;
 import ru.unisuite.synchronizer.disktool.DiskTool;
 
@@ -23,13 +17,17 @@ public class Synchronizer {
 	private static final String rootDirectory = "C:\\Users\\romanov\\Desktop\\Synchronizer\\SyncFolder";
 
 	private static DiskTool diskTool = new DiskTool(rootDirectory);
-	private static DbTool h2DbTool = new H2DbTool();
+	private static DbTool h2DbTool;
 
 	// ¬ качестве аргумента сначала приходит действие, которое необходимо выполнить,
 	// потом перечисление файлов.
 	// ≈сли список параметров пусть, выполн€етс€ полна€ синхронизаци€
-	public static void main(String args[]) throws SQLException, IOException {
+	public static void main(String args[]) throws SQLException, IOException, SynchronizerPropertiesException {
 
+		SynchronizerProperties properties = new SynchronizerProperties();
+		
+		h2DbTool = new H2DbTool(new DbToolProperties(properties.getDbUrl(), properties.getDbUserName(), properties.getDbPassword(), properties.getDriverClassName()));
+		
 		if (args.length == 0) {
 			sync();
 		} else {
@@ -38,7 +36,7 @@ public class Synchronizer {
 				upload(args);
 			case "download":
 				download(args);
-			case "sync":
+			case "sync": 
 				sync(args);
 			case "help":
 				;

@@ -15,8 +15,16 @@ import java.util.logging.Logger;
 
 import ru.unisuite.synchronizer.SyncObject;
 import ru.unisuite.synchronizer.Synchronizer;
+import ru.unisuite.synchronizer.SynchronizerProperties;
 
 public class H2DbTool implements DbTool {
+
+	private DbToolProperties dbProperties;
+
+	public H2DbTool(DbToolProperties properties) {
+
+		dbProperties = new DbToolProperties(properties.getDbUrl(), properties.getDbUserName(), properties.getDbPassword(), properties.getDriverClassName());
+	}
 
 	Logger logger = Logger.getLogger(Synchronizer.class.getName());
 
@@ -28,13 +36,13 @@ public class H2DbTool implements DbTool {
 	public Connection getConnection() {
 
 		try {
-			Class.forName("org.h2.Driver");
+			Class.forName(dbProperties.getDriverClassName());
 		} catch (ClassNotFoundException e) {
 			logger.log(Level.SEVERE, "Can not set driver for DB. ", e);
 		}
 
 		try {
-			return DriverManager.getConnection("jdbc:h2:~/test", "sa", "");
+			return DriverManager.getConnection(dbProperties.getDbUrl(), dbProperties.getDbUserName(), dbProperties.getDbPassword());
 		} catch (SQLException e) {
 			logger.log(Level.SEVERE, "Can not get db connection. ", e);
 			return null;
@@ -108,15 +116,15 @@ public class H2DbTool implements DbTool {
 			try (ResultSet resultSet = preparedStatement.executeQuery()) {
 
 				while (resultSet.next() != false) {
-					
+
 					array.add(resultSet.getString(DbToolParamName.alias));
-					
+
 				}
-				
+
 			}
 
 		}
-		
+
 		return array;
 
 	}
