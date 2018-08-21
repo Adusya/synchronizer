@@ -45,6 +45,7 @@ public class JournalWriter {
 
 	public void close() throws IOException {
 		if (fileWriter != null)
+			fileWriter.flush();
 			fileWriter.close();
 	}
 	

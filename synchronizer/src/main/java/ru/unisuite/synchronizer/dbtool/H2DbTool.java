@@ -81,7 +81,7 @@ public class H2DbTool implements DbTool {
 	public void saveSyncObjectToDB(SyncObject syncObject) throws SQLException, IOException {
 
 		final String mergeSQLQuery = "MERGE INTO clobs KEY(ALIAS) VALUES(select id from clobs where ALIAS = ?, ?, ?, ?)";
-
+		
 		String clob = syncObject.getClob();
 
 		try (Connection connection = getConnection();

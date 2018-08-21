@@ -32,7 +32,7 @@ public class Synchronizer {
 		String myJarPath = Synchronizer.class.getProtectionDomain().getCodeSource().getLocation().getPath();
 		rootDirectory = new File(myJarPath).getParent();
 		
-//		rootDirectory = "C:\\Users\\romanov\\Desktop\\Synchronizer\\SyncFolder";
+		rootDirectory = "C:\\Users\\romanov\\Desktop\\Synchronizer\\SyncFolder";
 		
 		journalWriter = new JournalWriter(rootDirectory);
 		
@@ -46,14 +46,17 @@ public class Synchronizer {
 			switch (args[0]) {
 			case "upload":
 				upload(args);
+				break;
 			case "download":
 				download(args);
+				break;
 			case "sync": 
 				sync(args);
+				break;
 			case "help":
-				;
+				break;
 			default:
-				;
+				break;
 			}
 		}
 
@@ -94,11 +97,13 @@ public class Synchronizer {
 	private static void upload(String args[]) throws SQLException, IOException {
 
 		if (args.length < 2) {
-			args = diskTool.getFullFileList();
-
-			for (int i = 0; i < args.length; i++) {
-				saveFromDiskToDb(args[i]);
-				journalWriter.appendUploaded(args[i]);
+			
+			ArrayList<String> array = diskTool.getFullFileList();
+			
+			for (String fileName: array) {
+				System.out.println(fileName);
+				saveFromDiskToDb(fileName);
+				journalWriter.appendUploaded(fileName);
 			}
 		} else {
 

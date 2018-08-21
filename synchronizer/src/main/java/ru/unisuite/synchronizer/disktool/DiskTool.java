@@ -7,6 +7,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Reader;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 
 import ru.unisuite.synchronizer.SyncObject;
 
@@ -34,7 +35,7 @@ public class DiskTool {
 		
 		SyncObject syncObject = null;
 		
-		if (file.exists()) {
+		if (file.exists() && file.isFile()) {
 			Timestamp modificationDate = new Timestamp(file.lastModified());
 			Reader fileReader = new FileReader(file);
 			String clob = readToString(fileReader);
@@ -70,11 +71,21 @@ public class DiskTool {
 		return targetString;
 	}
 	
-	public String[] getFullFileList() {
+	public ArrayList<String> getFullFileList() {
+		
+		ArrayList<String> arrayListFiles = new ArrayList<String>();
 		
 		File rootFolder = new File(rootDirectory);
 		
-		return rootFolder.list();
+		File[] listFiles = rootFolder.listFiles();
+		
+		for (File file: listFiles) {
+			if (file.isFile())
+				arrayListFiles.add(file.getName());
+			
+		}
+		
+		return arrayListFiles;
 		
 	}
 }
