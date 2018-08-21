@@ -142,9 +142,9 @@ public class Synchronizer {
 		
 		builder.append("usage: sync <command> [fileNames] \n \n");
 		builder.append("List of commands: \n");
-		builder.append("   upload      uplouads files from disk to db \n");
-		builder.append("   download    downloads files from db to disk \n");
-		builder.append("   sync        sync \n");
+		builder.append("   upload      uplouad all files from disk to db \n");
+		builder.append("   download    download all files from db to disk \n");
+		builder.append("   sync        sync(under construction) \n");
 		
 		System.out.println(builder);
 		
