@@ -8,7 +8,7 @@ import java.util.logging.Logger;
 
 import ru.unisuite.synchronizer.dbtool.DbTool;
 import ru.unisuite.synchronizer.dbtool.DbToolProperties;
-import ru.unisuite.synchronizer.dbtool.H2DbTool;
+import ru.unisuite.synchronizer.dbtool.JdbcDbTool;
 import ru.unisuite.synchronizer.disktool.DiskTool;
 
 public class Synchronizer {
@@ -32,11 +32,11 @@ public class Synchronizer {
 		String myJarPath = Synchronizer.class.getProtectionDomain().getCodeSource().getLocation().getPath();
 		rootDirectory = new File(myJarPath).getParent();
 		
-		rootDirectory = "C:\\Users\\romanov\\Desktop\\Synchronizer\\SyncFolder";
+//		rootDirectory = "C:\\Users\\romanov\\Desktop\\Synchronizer\\SyncFolder";
 		
 		journalWriter = new JournalWriter(rootDirectory);
 		
-		h2DbTool = new H2DbTool(new DbToolProperties(properties.getDbUrl(), properties.getDbUserName(), properties.getDbPassword(), properties.getDriverClassName()));
+		h2DbTool = new JdbcDbTool(new DbToolProperties(properties.getDbUrl(), properties.getDbUserName(), properties.getDbPassword(), properties.getDriverClassName()));
 		
 		diskTool = new DiskTool(rootDirectory);
 

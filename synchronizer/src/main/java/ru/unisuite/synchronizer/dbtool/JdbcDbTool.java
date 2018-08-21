@@ -15,16 +15,16 @@ import java.util.logging.Logger;
 
 import ru.unisuite.synchronizer.SyncObject;
 
-public class H2DbTool implements DbTool {
+public class JdbcDbTool implements DbTool {
 
 	private DbToolProperties dbProperties;
 
-	public H2DbTool(DbToolProperties properties) {
+	public JdbcDbTool(DbToolProperties properties) {
 
 		dbProperties = new DbToolProperties(properties.getDbUrl(), properties.getDbUserName(), properties.getDbPassword(), properties.getDriverClassName());
 	}
 
-	Logger logger = Logger.getLogger(H2DbTool.class.getName());
+	Logger logger = Logger.getLogger(JdbcDbTool.class.getName());
 
 	public Connection getConnection() {
 
