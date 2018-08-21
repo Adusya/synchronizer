@@ -20,7 +20,7 @@ public class Synchronizer {
 	private static String rootDirectory;
 
 	private static DiskTool diskTool;
-	private static DbTool h2DbTool;
+	private static DbTool jdbcDbTool;
 
 	// В качестве аргумента сначала приходит действие, которое необходимо выполнить,
 	// потом перечисление файлов.
@@ -36,7 +36,7 @@ public class Synchronizer {
 		
 		journalWriter = new JournalWriter(rootDirectory);
 		
-		h2DbTool = new JdbcDbTool(new DbToolProperties(properties.getDbUrl(), properties.getDbUserName(), properties.getDbPassword(), properties.getDriverClassName()));
+		jdbcDbTool = new JdbcDbTool(new DbToolProperties(properties.getDbUrl(), properties.getDbUserName(), properties.getDbPassword(), properties.getDriverClassName()));
 		
 		diskTool = new DiskTool(rootDirectory);
 
@@ -54,8 +54,10 @@ public class Synchronizer {
 				sync(args);
 				break;
 			case "help":
+				helpCommand();
 				break;
 			default:
+				System.out.println(String.format("unknown command %s. To view the list of commands use command \"help\"", args[0]));
 				break;
 			}
 		}
@@ -68,13 +70,13 @@ public class Synchronizer {
 
 		SyncObject syncObject = getSyncObjectFromDisk(fileName);
 
-		h2DbTool.saveSyncObjectToDB(syncObject);
+		jdbcDbTool.saveSyncObjectToDB(syncObject);
 
 	}
 
 	public static void saveFromDbToDisk(String fileName) throws SQLException, IOException {
 
-		SyncObject syncObject = h2DbTool.fetchSyncObjectFromDB(fileName);
+		SyncObject syncObject = jdbcDbTool.fetchSyncObjectFromDB(fileName);
 
 		diskTool.saveSyncObjectToDisk(syncObject);
 
@@ -118,7 +120,7 @@ public class Synchronizer {
 
 		if (args.length < 2) {
 			
-			ArrayList<String> array = h2DbTool.getFullFileList();
+			ArrayList<String> array = jdbcDbTool.getFullFileList();
 			
 			for (String fileName: array) {
 				saveFromDbToDisk(fileName);
@@ -133,6 +135,21 @@ public class Synchronizer {
 		}
 
 	}
+	
+	private static void helpCommand() {
+		
+		StringBuilder builder = new StringBuilder();
+		
+		builder.append("usage: sync <command> [fileNames] \n \n");
+		builder.append("List of commands: \n");
+		builder.append("   upload      uplouads files from disk to db \n");
+		builder.append("   download    downloads files from db to disk \n");
+		builder.append("   sync        sync \n");
+		
+		System.out.println(builder);
+		
+	}
+
 
 	// private static void printDiffs(LinkedList<Diff> diffList) {
 	//
