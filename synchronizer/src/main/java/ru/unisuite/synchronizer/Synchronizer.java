@@ -1,5 +1,6 @@
 package ru.unisuite.synchronizer;
 
+import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -14,20 +15,25 @@ public class Synchronizer {
 
 	private static Logger logger = Logger.getLogger(Synchronizer.class.getName());
 
-	private static final String rootDirectory = "C:\\Users\\romanov\\Desktop\\Synchronizer\\SyncFolder";
+	private static String rootDirectory;
 
-	private static DiskTool diskTool = new DiskTool(rootDirectory);
+	private static DiskTool diskTool;
 	private static DbTool h2DbTool;
 
-	// В качестве аргумента сначала приходит действие, которое необходимо выполнить,
-	// потом перечисление файлов.
-	// Если список параметров пусть, выполняется полная синхронизация
+	// Р’ РєР°С‡РµСЃС‚РІРµ Р°СЂРіСѓРјРµРЅС‚Р° СЃРЅР°С‡Р°Р»Р° РїСЂРёС…РѕРґРёС‚ РґРµР№СЃС‚РІРёРµ, РєРѕС‚РѕСЂРѕРµ РЅРµРѕР±С…РѕРґРёРјРѕ РІС‹РїРѕР»РЅРёС‚СЊ,
+	// РїРѕС‚РѕРј РїРµСЂРµС‡РёСЃР»РµРЅРёРµ С„Р°Р№Р»РѕРІ.
+	// Р•СЃР»Рё СЃРїРёСЃРѕРє РїР°СЂР°РјРµС‚СЂРѕРІ РїСѓСЃС‚СЊ, РІС‹РїРѕР»РЅСЏРµС‚СЃСЏ РїРѕР»РЅР°СЏ СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёСЏ
 	public static void main(String args[]) throws SQLException, IOException, SynchronizerPropertiesException {
-
+		
 		SynchronizerProperties properties = new SynchronizerProperties();
 		
 		h2DbTool = new H2DbTool(new DbToolProperties(properties.getDbUrl(), properties.getDbUserName(), properties.getDbPassword(), properties.getDriverClassName()));
 		
+		String myJarPath = Synchronizer.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+		rootDirectory = new File(myJarPath).getParent();
+		
+		diskTool = new DiskTool(rootDirectory);
+
 		if (args.length == 0) {
 			sync();
 		} else {
@@ -96,7 +102,6 @@ public class Synchronizer {
 	private static void download(String args[]) throws SQLException, IOException {
 
 		if (args.length < 2) {
-			args = diskTool.getFullFileList();
 			
 			ArrayList<String> array = h2DbTool.getFullFileList();
 			

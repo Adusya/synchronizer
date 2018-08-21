@@ -14,8 +14,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import ru.unisuite.synchronizer.SyncObject;
-import ru.unisuite.synchronizer.Synchronizer;
-import ru.unisuite.synchronizer.SynchronizerProperties;
 
 public class H2DbTool implements DbTool {
 
@@ -26,7 +24,7 @@ public class H2DbTool implements DbTool {
 		dbProperties = new DbToolProperties(properties.getDbUrl(), properties.getDbUserName(), properties.getDbPassword(), properties.getDriverClassName());
 	}
 
-	Logger logger = Logger.getLogger(Synchronizer.class.getName());
+	Logger logger = Logger.getLogger(H2DbTool.class.getName());
 
 	public boolean saveStringToDb(String string) {
 
@@ -53,7 +51,7 @@ public class H2DbTool implements DbTool {
 	public SyncObject fetchSyncObjectFromDB(String fileName) throws SQLException, IOException {
 
 		final String selectSQKQuery = "SELECT id, alias, modification_date, clob FROM CLOBS  where alias = ?";
-
+ 
 		SyncObject syncObject = null;
 
 		try (Connection connection = getConnection();

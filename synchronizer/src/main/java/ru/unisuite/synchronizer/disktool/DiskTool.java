@@ -17,6 +17,7 @@ public class DiskTool {
 	public DiskTool(String rootDirectory) {
 
 		this.rootDirectory = rootDirectory;
+//		this.rootDirectory = "C:\\Users\\romanov\\Desktop\\Synchronizer\\SyncFolder";
 
 		File rootFolder = new File(rootDirectory);
 
