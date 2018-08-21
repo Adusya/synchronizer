@@ -26,11 +26,6 @@ public class H2DbTool implements DbTool {
 
 	Logger logger = Logger.getLogger(H2DbTool.class.getName());
 
-	public boolean saveStringToDb(String string) {
-
-		return false;
-	}
-
 	public Connection getConnection() {
 
 		try {

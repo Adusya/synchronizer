@@ -15,6 +15,8 @@ public class Synchronizer {
 
 	private static Logger logger = Logger.getLogger(Synchronizer.class.getName());
 
+	private static JournalWriter journalWriter;
+	
 	private static String rootDirectory;
 
 	private static DiskTool diskTool;
@@ -27,10 +29,14 @@ public class Synchronizer {
 		
 		SynchronizerProperties properties = new SynchronizerProperties();
 		
-		h2DbTool = new H2DbTool(new DbToolProperties(properties.getDbUrl(), properties.getDbUserName(), properties.getDbPassword(), properties.getDriverClassName()));
-		
 		String myJarPath = Synchronizer.class.getProtectionDomain().getCodeSource().getLocation().getPath();
 		rootDirectory = new File(myJarPath).getParent();
+		
+//		rootDirectory = "C:\\Users\\romanov\\Desktop\\Synchronizer\\SyncFolder";
+		
+		journalWriter = new JournalWriter(rootDirectory);
+		
+		h2DbTool = new H2DbTool(new DbToolProperties(properties.getDbUrl(), properties.getDbUserName(), properties.getDbPassword(), properties.getDriverClassName()));
 		
 		diskTool = new DiskTool(rootDirectory);
 
@@ -51,6 +57,8 @@ public class Synchronizer {
 			}
 		}
 
+		journalWriter.close();
+		
 	}
 
 	public static void saveFromDiskToDb(String fileName) throws SQLException, IOException {
@@ -90,11 +98,13 @@ public class Synchronizer {
 
 			for (int i = 0; i < args.length; i++) {
 				saveFromDiskToDb(args[i]);
+				journalWriter.appendUploaded(args[i]);
 			}
 		} else {
 
 			for (int i = 1; i < args.length; i++) {
 				saveFromDiskToDb(args[i]);
+				journalWriter.appendUploaded(args[i]);
 			}
 		}
 	}
@@ -107,12 +117,14 @@ public class Synchronizer {
 			
 			for (String fileName: array) {
 				saveFromDbToDisk(fileName);
+				journalWriter.appendDownloaded(fileName);
 			}
 			
 		}
 		
 		for (int i = 1; i < args.length; i++) {
 			saveFromDbToDisk(args[i]);
+			journalWriter.appendDownloaded(args[i]);
 		}
 
 	}
