@@ -6,8 +6,12 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Reader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Stream;
 
 import ru.unisuite.synchronizer.SyncObject;
 
@@ -37,9 +41,7 @@ public class DiskTool {
 		
 		if (file.exists() && file.isFile()) {
 			Timestamp modificationDate = new Timestamp(file.lastModified());
-			Reader fileReader = new FileReader(file);
-			String clob = readToString(fileReader);
-			fileReader.close();
+			String clob = readFileToString(fileFullPath);
 
 			syncObject = new SyncObject(null, fileName, modificationDate, clob);
 		}
@@ -71,9 +73,9 @@ public class DiskTool {
 		return targetString;
 	}
 	
-	public ArrayList<String> getFullFileList() {
+	public List<String> getFullFileList() {
 		
-		ArrayList<String> arrayListFiles = new ArrayList<String>();
+		List<String> arrayListFiles = new ArrayList<>();
 		
 		File rootFolder = new File(rootDirectory);
 		
@@ -88,4 +90,20 @@ public class DiskTool {
 		return arrayListFiles;
 		
 	}
+	
+	public String readFileToString(String fileName) throws IOException {
+
+        StringBuilder sb = new StringBuilder();
+
+        //read file into stream, try-with-resources
+        try (Stream<String> stream = Files.lines(Paths.get(fileName))) {
+
+            stream.forEach(line -> {
+                sb.append(line + "\n"); // add space so that lines don't stick to each other
+            });
+
+        }
+
+        return sb.toString();
+    }
 }
