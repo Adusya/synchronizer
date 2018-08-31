@@ -15,7 +15,7 @@ public class JournalWriter {
 	public JournalWriter(String rootDirectory) throws UnsupportedEncodingException, FileNotFoundException {
 
 		String journalFileName = "/journal.txt";
-		String journalFullPath = rootDirectory + "/journal";
+		String journalFullPath = rootDirectory + "/.journal";
 		
 		checkIfExists(journalFullPath);
 

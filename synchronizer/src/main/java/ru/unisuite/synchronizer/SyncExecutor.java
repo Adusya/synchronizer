@@ -74,6 +74,9 @@ public class SyncExecutor {
 		
 		if (!fullFileNamesList.isEmpty()) {
 			
+			if (fullFileNamesList.contains(jarName))
+				fullFileNamesList.remove(jarName);
+			
 			for (String fileName : fullFileNamesList) {
 				saveFromDiskToDb(fileName);
 				journalWriter.appendUploaded(fileName);
@@ -88,6 +91,9 @@ public class SyncExecutor {
 		if (fileNamesList.isEmpty()) {
 			upload();
 		} else {
+
+			if (fileNamesList.contains(jarName))
+				fileNamesList.remove(jarName);
 
 			for (String fileName : fileNamesList) {
 				saveFromDiskToDb(fileName);
