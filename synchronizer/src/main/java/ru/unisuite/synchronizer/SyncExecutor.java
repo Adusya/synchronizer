@@ -148,8 +148,8 @@ public class SyncExecutor {
 
 	private String getRootDirectory() {
 
-		return Synchronizer.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-
+		String jarPath = Synchronizer.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+		return new File(jarPath).getParent();
 	}
 
 	private String getJarName() {

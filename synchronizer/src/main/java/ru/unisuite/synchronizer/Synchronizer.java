@@ -16,7 +16,7 @@ public class Synchronizer {
 	public static void main(String args[]) throws SQLException, IOException, SynchronizerPropertiesException {
 		
 		StandartTag tag = getTag(args);
-
+		
 		SyncExecutor executor = new SyncExecutor(tag);
 
 		StandartCommand command = getCommand(args);
