@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
+import java.util.List;
 
 import ru.unisuite.synchronizer.SyncObject;
 
@@ -18,6 +18,6 @@ public interface DbTool {
 	
 	public String readToString(Reader reader) throws IOException;
 	
-	public ArrayList<String> getFullFileList() throws SQLException;
+	public List<String> getFullFileList() throws SQLException;
 
 }

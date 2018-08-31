@@ -1,16 +1,9 @@
 package ru.unisuite.synchronizer;
 
-import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
-
-import ru.unisuite.synchronizer.dbtool.DbTool;
-import ru.unisuite.synchronizer.dbtool.DbToolProperties;
-import ru.unisuite.synchronizer.dbtool.JdbcDbTool;
-import ru.unisuite.synchronizer.disktool.DiskTool;
 
 public class Synchronizer {
 
@@ -18,13 +11,13 @@ public class Synchronizer {
 	private final static String defaultCommand = "sync";
 
 	// В качестве аргумента сначала приходит действие, которое необходимо выполнить,
-	// потом перечисление файлов.
+	// далее тег, определяющий парметры запуска, потом перечисление файлов.
 	// Если список параметров пусть, выполняется полная синхронизация
 	public static void main(String args[]) throws SQLException, IOException, SynchronizerPropertiesException {
+		
+		StandartTag tag = getTag(args);
 
-		String tag = getTag(args);
-
-		SyncExecutor executor = null;// new SyncExecutor(tag);
+		SyncExecutor executor = new SyncExecutor(tag);
 
 		StandartCommand command = getCommand(args);
 
@@ -76,17 +69,18 @@ public class Synchronizer {
 		return command;
 	}
 
-	private static String getTag(String args[]) {
+	private static StandartTag getTag(String args[]) {
 
-		String tag = null;
+		StandartTag tag = null;
 
 		if (args.length == 0) {
-			return defaultTag;
+			return StandartTag.valueOf(defaultTag);
 		}
 
 		for (String argument : args) {
 			if (argument.startsWith("-"));
-			tag = argument;
+				if (StandartTag.contains(argument))
+					tag = StandartTag.valueOf(argument);
 		}
 
 		return tag;

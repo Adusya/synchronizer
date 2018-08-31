@@ -9,8 +9,18 @@ import ru.unisuite.synchronizer.SynchronizerPropertiesException;
 
 public class SyncProperties {
 
-	public SyncProperties() throws SynchronizerPropertiesException {
-		initFromProperties();
+	public SyncProperties(StandartTag tag) throws SynchronizerPropertiesException {
+		
+		String configFileName;
+		
+		if (tag == StandartTag.production || tag == StandartTag.p) {
+			
+			configFileName = productionConfigFile;
+		} else {
+			configFileName = developmentConfigFile;
+		}
+		
+		initFromProperties(configFileName);
 	}
 	
 	private static final Logger logger = Logger.getLogger(SyncProperties.class.getName());
@@ -19,10 +29,19 @@ public class SyncProperties {
 	private String dbUserName;
 	private String dbPassword;
 	private String driverClassName;
+	
+	private String dbName;
+	private String id;
+	private String alias;
+	private String modificationDate;
+	private String clob;
+	
+	private final String developmentConfigFile = "development.properties";
+	
+	private final String productionConfigFile = "production.properties";
 
-	private void initFromProperties() throws SynchronizerPropertiesException {
+	private void initFromProperties(String filename) throws SynchronizerPropertiesException {
 
-		String filename = "sync.properties";
 		try (InputStream input = this.getClass().getClassLoader().getResourceAsStream(filename)) {
 
 			if (input == null) {
@@ -34,21 +53,32 @@ public class SyncProperties {
 			Properties prop = new Properties();
 			prop.load(input);
 
-			String dbUrl = prop.getProperty("ru.unisuite.synchronizer.db.datasource.url");
-
+			String dbUrl = prop.getProperty(PropertiesParamName.URL);
 			this.dbUrl = dbUrl;
 
-			String dbUserName = prop.getProperty("ru.unisuite.synchronizer.db.datasource.username");
-
+			String dbUserName = prop.getProperty(PropertiesParamName.USERNAME);
 			this.dbUserName = dbUserName;
 
-			String dbPassword = prop.getProperty("ru.unisuite.synchronizer.db.datasource.password");
-
+			String dbPassword = prop.getProperty(PropertiesParamName.PASSWORD);
 			this.dbPassword = dbPassword;
 
-			String driverClassName = prop.getProperty("ru.unisuite.synchronizer.db.datasource.driver-class-name");
-			
+			String driverClassName = prop.getProperty(PropertiesParamName.DRIVER_CLASS_NAME);
 			this.driverClassName = driverClassName;
+			
+			String dbName = prop.getProperty(PropertiesParamName.TABLE_NAME);
+			this.dbName = dbName;
+			
+			String id = prop.getProperty(PropertiesParamName.ID);
+			this.id = id;
+			
+			String alias = prop.getProperty(PropertiesParamName.ALIAS);
+			this.alias = alias;
+			
+			String modificationDate = prop.getProperty(PropertiesParamName.MODIFICATION_DATE);
+			this.modificationDate = modificationDate;
+			
+			String clob = prop.getProperty(PropertiesParamName.CLOB);
+			this.clob = clob;
 
 		} catch (IOException e) {
 			// e.printStackTrace();
@@ -79,4 +109,23 @@ public class SyncProperties {
 		return driverClassName;
 	}
 
+	public String getDbName() {
+		return dbName;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public String getAlias() {
+		return alias;
+	}
+
+	public String getModificationDate() {
+		return modificationDate;
+	}
+
+	public String getClob() {
+		return clob;
+	}
 }

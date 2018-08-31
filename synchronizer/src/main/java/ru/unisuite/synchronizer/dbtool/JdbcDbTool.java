@@ -10,18 +10,20 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import ru.unisuite.synchronizer.SyncObject;
+import ru.unisuite.synchronizer.SyncProperties;
 
 public class JdbcDbTool implements DbTool {
 
 	private DbToolProperties dbProperties;
 
-	public JdbcDbTool(DbToolProperties properties) {
+	public JdbcDbTool(SyncProperties properties) {
 
-		dbProperties = new DbToolProperties(properties.getDbUrl(), properties.getDbUserName(), properties.getDbPassword(), properties.getDriverClassName());
+		dbProperties = new DbToolProperties(properties);
 	}
 
 	Logger logger = Logger.getLogger(JdbcDbTool.class.getName());
@@ -35,7 +37,8 @@ public class JdbcDbTool implements DbTool {
 		}
 
 		try {
-			return DriverManager.getConnection(dbProperties.getDbUrl(), dbProperties.getDbUserName(), dbProperties.getDbPassword());
+			return DriverManager.getConnection(dbProperties.getDbUrl(), dbProperties.getDbUserName(),
+					dbProperties.getDbPassword());
 		} catch (SQLException e) {
 			logger.log(Level.SEVERE, "Can not get db connection. ", e);
 			return null;
@@ -45,8 +48,10 @@ public class JdbcDbTool implements DbTool {
 
 	public SyncObject fetchSyncObjectFromDB(String fileName) throws SQLException, IOException {
 
-		final String selectSQKQuery = "SELECT id, alias, modification_date, clob FROM CLOBS  where alias = ?";
- 
+		final String selectSQKQuery = String.format("SELECT %s, %s, %s, %s FROM %s  where %s = ?", dbProperties.getId(),
+				dbProperties.getAlias(), dbProperties.getModificationDate(), dbProperties.getClob(),
+				dbProperties.getDbName(), dbProperties.getAlias());
+
 		SyncObject syncObject = null;
 
 		try (Connection connection = getConnection();
@@ -80,8 +85,10 @@ public class JdbcDbTool implements DbTool {
 
 	public void saveSyncObjectToDB(SyncObject syncObject) throws SQLException, IOException {
 
-		final String mergeSQLQuery = "MERGE INTO clobs KEY(ALIAS) VALUES(select id from clobs where ALIAS = ?, ?, ?, ?)";
-		
+		final String mergeSQLQuery = String.format(
+				"MERGE INTO %s KEY(%s) VALUES((select %s from %s where %s = ?), ?, ?, ?)", dbProperties.getDbName(),
+				dbProperties.getAlias(), dbProperties.getId(), dbProperties.getDbName(), dbProperties.getAlias());
+
 		String clob = syncObject.getClob();
 
 		try (Connection connection = getConnection();
@@ -97,11 +104,12 @@ public class JdbcDbTool implements DbTool {
 
 	}
 
-	public ArrayList<String> getFullFileList() throws SQLException {
+	public List<String> getFullFileList() throws SQLException {
 
-		final String selectSQLQuery = "select alias from clobs";
+		final String selectSQLQuery = String.format("select %s from %s", dbProperties.getAlias(),
+				dbProperties.getDbName());
 
-		ArrayList<String> array = new ArrayList<>();
+		List<String> array = new ArrayList<>();
 
 		try (Connection connection = getConnection();
 				PreparedStatement preparedStatement = (PreparedStatement) connection.prepareStatement(selectSQLQuery)) {

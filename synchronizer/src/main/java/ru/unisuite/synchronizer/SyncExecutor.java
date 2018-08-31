@@ -5,28 +5,25 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
 import ru.unisuite.synchronizer.dbtool.DbTool;
-import ru.unisuite.synchronizer.dbtool.DbToolProperties;
 import ru.unisuite.synchronizer.dbtool.JdbcDbTool;
 import ru.unisuite.synchronizer.disktool.DiskTool;
 
 public class SyncExecutor {
 
-	public SyncExecutor() throws SynchronizerPropertiesException, UnsupportedEncodingException, FileNotFoundException {
+	public SyncExecutor(StandartTag tag) throws SynchronizerPropertiesException, UnsupportedEncodingException, FileNotFoundException {
 
-		SyncProperties properties = new SyncProperties();
+		SyncProperties properties = new SyncProperties(tag);
 
 		rootDirectory = getRootDirectory();
 		jarName = getJarName();
 
 		journalWriter = new JournalWriter(rootDirectory);
 
-		jdbcDbTool = new JdbcDbTool(new DbToolProperties(properties.getDbUrl(), properties.getDbUserName(),
-				properties.getDbPassword(), properties.getDriverClassName()));
+		jdbcDbTool = new JdbcDbTool(properties);
 
 		diskTool = new DiskTool(rootDirectory);
 	}
