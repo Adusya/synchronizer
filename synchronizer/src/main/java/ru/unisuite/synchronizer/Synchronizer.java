@@ -14,37 +14,103 @@ import ru.unisuite.synchronizer.disktool.DiskTool;
 
 public class Synchronizer {
 
+	private final static String defaultTag = "development";
+	private final static String defaultCommand = "sync";
+
 	// В качестве аргумента сначала приходит действие, которое необходимо выполнить,
 	// потом перечисление файлов.
 	// Если список параметров пусть, выполняется полная синхронизация
 	public static void main(String args[]) throws SQLException, IOException, SynchronizerPropertiesException {
-		
-		SyncExecutor executor = new SyncExecutor();
 
-		if (args.length == 0) {
-			executor.sync();
-		} else {
-			switch (args[0]) {
-			case "upload":
-				executor.upload(args);
-				break;
-			case "download":
-				executor.download(args);
-				break;
-			case "sync": 
-				executor.sync(args);
-				break;
-			case "help":
-				executor.helpCommand();
-				break;
-			default:
-				System.out.println(String.format("unknown command %s. To view the list of commands use command \"help\"", args[0]));
-				break;
-			}
+		String tag = getTag(args);
+
+		SyncExecutor executor = null;// new SyncExecutor(tag);
+
+		StandartCommand command = getCommand(args);
+
+		boolean conTag = false;
+		boolean conCommand = false;
+		if (tag != null)
+			conTag = true;
+		
+		if (command != null)
+			conCommand = true;
+		
+		List<String> fileNamesList = getFileNamesList(args, conTag, conCommand);
+		
+		switch (command) {
+		case upload:
+			executor.upload(fileNamesList);
+			break;
+		case download:
+			executor.download(fileNamesList);
+			break;
+		case sync:
+			executor.sync(fileNamesList);
+			break;
+		case help:
+			executor.helpCommand();
+			break;
+		default:
+			System.out.println(
+					String.format("unknown command %s. To view the list of commands use command \"help\"", args[0]));
+			break;
 		}
 
 		executor.close();
+
+	}
+
+	private static StandartCommand getCommand(String args[]) {
+
+		StandartCommand command = null;
+
+		if (args.length == 0) {
+			return command = StandartCommand.valueOf(defaultCommand);
+		}
+
+		if (StandartCommand.contains(args[0])) {
+			command = StandartCommand.valueOf(args[0]);
+		}
+
+		return command;
+	}
+
+	private static String getTag(String args[]) {
+
+		String tag = null;
+
+		if (args.length == 0) {
+			return defaultTag;
+		}
+
+		for (String argument : args) {
+			if (argument.startsWith("-"));
+			tag = argument;
+		}
+
+		return tag;
+	}
+	
+	private static List<String> getFileNamesList(String args[], boolean conTag, boolean conCommand) {
 		
+		List<String> fileNamesList = new ArrayList<>();
+		
+		int start = 0;
+		
+		if (conTag)
+			start++;
+		
+		if (conCommand)
+			start++;
+		
+		for (int i = start; i < args.length; i++) {
+			
+			fileNamesList.add(args[0]);
+			
+		}
+		
+		return fileNamesList;
 	}
 
 }

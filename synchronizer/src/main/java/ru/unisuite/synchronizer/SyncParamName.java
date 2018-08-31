@@ -2,13 +2,13 @@ package ru.unisuite.synchronizer;
 
 public class SyncParamName {
 
-	public static String update = "update";
+	public final static String UPDATE = "update";
 	
-	public static String sync = "sync";
+	public final static String SYNC = "sync";
 	
-	public static String download = "download";
+	public final static String DOWNLOAD = "download";
 	
-	public static String help = "help";
+	public final static String HELP = "help";
 	
 	
 	

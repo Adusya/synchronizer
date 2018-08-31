@@ -15,31 +15,32 @@ import ru.unisuite.synchronizer.dbtool.JdbcDbTool;
 import ru.unisuite.synchronizer.disktool.DiskTool;
 
 public class SyncExecutor {
-	
+
 	public SyncExecutor() throws SynchronizerPropertiesException, UnsupportedEncodingException, FileNotFoundException {
-		
+
 		SyncProperties properties = new SyncProperties();
-		
+
 		rootDirectory = getRootDirectory();
 		jarName = getJarName();
-		
+
 		journalWriter = new JournalWriter(rootDirectory);
-		
-		jdbcDbTool = new JdbcDbTool(new DbToolProperties(properties.getDbUrl(), properties.getDbUserName(), properties.getDbPassword(), properties.getDriverClassName()));
-		
+
+		jdbcDbTool = new JdbcDbTool(new DbToolProperties(properties.getDbUrl(), properties.getDbUserName(),
+				properties.getDbPassword(), properties.getDriverClassName()));
+
 		diskTool = new DiskTool(rootDirectory);
 	}
 
 	private static Logger logger = Logger.getLogger(Synchronizer.class.getName());
 
 	private JournalWriter journalWriter;
-	
+
 	private String rootDirectory;
 	private String jarName;
 
 	private DiskTool diskTool;
 	private DbTool jdbcDbTool;
-	
+
 	public void saveFromDiskToDb(String fileName) throws SQLException, IOException {
 
 		SyncObject syncObject = getSyncObjectFromDisk(fileName);
@@ -66,47 +67,66 @@ public class SyncExecutor {
 
 	}
 
-	public void sync(String args[]) {
+	public void sync(List<String> fileNamesList) {
 
 	}
 
-	public void upload(String args[]) throws SQLException, IOException {
+	public void upload() throws IOException, SQLException {
 
-		if (args.length < 2) {
+		List<String> fullFileNamesList = diskTool.getFullFileList();
+		
+		if (!fullFileNamesList.isEmpty()) {
+			
+			for (String fileName : fullFileNamesList) {
+				saveFromDiskToDb(fileName);
+				journalWriter.appendUploaded(fileName);
+				
+			}
+		}
+		
+	}
 
-			List<String> array = diskTool.getFullFileList();
+	public void upload(List<String> fileNamesList) throws SQLException, IOException {
 
-			for (String fileName : array) {
+		if (fileNamesList.isEmpty()) {
+			upload();
+		} else {
+
+			for (String fileName : fileNamesList) {
 				saveFromDiskToDb(fileName);
 				journalWriter.appendUploaded(fileName);
 			}
-		} else {
-
-			for (int i = 1; i < args.length; i++) {
-				saveFromDiskToDb(args[i]);
-				journalWriter.appendUploaded(args[i]);
-			}
 		}
+
 	}
-
-	public void download(String args[]) throws SQLException, IOException {
-
-		if (args.length < 2) {
-
-			ArrayList<String> array = jdbcDbTool.getFullFileList();
-
-			for (String fileName : array) {
+	
+	public void download() throws SQLException, IOException {
+		
+		List<String> fullFileNamesList = jdbcDbTool.getFullFileList();
+		
+		if (!fullFileNamesList.isEmpty()) {
+			
+			for (String fileName : fullFileNamesList) {
 				saveFromDbToDisk(fileName);
 				journalWriter.appendDownloaded(fileName);
 			}
-
 		}
+		
+	}
 
-		for (int i = 1; i < args.length; i++) {
-			saveFromDbToDisk(args[i]);
-			journalWriter.appendDownloaded(args[i]);
+	public void download(List<String> fileNamesList) throws SQLException, IOException {
+
+		if (fileNamesList.isEmpty()) {
+			download();
+		} else {
+			
+			for (String fileName : fileNamesList) {
+				saveFromDbToDisk(fileName);
+				journalWriter.appendDownloaded(fileName);
+			}
+			
 		}
-
+		
 	}
 
 	public void helpCommand() {
@@ -135,9 +155,9 @@ public class SyncExecutor {
 		return new File(jarPath).getName();
 
 	}
-	
+
 	public void close() throws IOException {
-		if (journalWriter != null) 
+		if (journalWriter != null)
 			journalWriter.close();
 	}
 
