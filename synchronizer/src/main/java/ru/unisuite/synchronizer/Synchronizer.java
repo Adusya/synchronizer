@@ -79,6 +79,7 @@ public class Synchronizer {
 
 		for (String argument : args) {
 			if (argument.startsWith("-"));
+				argument = argument.substring(1);
 				if (StandartTag.contains(argument))
 					tag = StandartTag.valueOf(argument);
 		}
@@ -100,8 +101,7 @@ public class Synchronizer {
 		
 		for (int i = start; i < args.length; i++) {
 			
-			fileNamesList.add(args[0]);
-			
+			fileNamesList.add(args[i]);
 		}
 		
 		return fileNamesList;

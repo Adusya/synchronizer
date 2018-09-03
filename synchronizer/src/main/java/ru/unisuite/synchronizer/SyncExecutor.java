@@ -14,7 +14,8 @@ import ru.unisuite.synchronizer.disktool.DiskTool;
 
 public class SyncExecutor {
 
-	public SyncExecutor(StandartTag tag) throws SynchronizerPropertiesException, UnsupportedEncodingException, FileNotFoundException {
+	public SyncExecutor(StandartTag tag)
+			throws SynchronizerPropertiesException, UnsupportedEncodingException, FileNotFoundException {
 
 		SyncProperties properties = new SyncProperties(tag);
 
@@ -42,7 +43,11 @@ public class SyncExecutor {
 
 		SyncObject syncObject = getSyncObjectFromDisk(fileName);
 
-		jdbcDbTool.saveSyncObjectToDB(syncObject);
+		if (syncObject == null) {
+			System.out.println(String.format("File %s does not exist", fileName));
+		} else {
+			jdbcDbTool.saveSyncObjectToDB(syncObject);
+		}
 
 	}
 
@@ -50,8 +55,12 @@ public class SyncExecutor {
 
 		SyncObject syncObject = jdbcDbTool.fetchSyncObjectFromDB(fileName);
 
-		diskTool.saveSyncObjectToDisk(syncObject);
-
+		if (syncObject == null) {
+			System.out.println(String.format("File %s does not exist", fileName));
+		} else {
+			diskTool.saveSyncObjectToDisk(syncObject);
+		}
+		
 	}
 
 	private SyncObject getSyncObjectFromDisk(String fileName) throws IOException {
@@ -71,19 +80,19 @@ public class SyncExecutor {
 	public void upload() throws IOException, SQLException {
 
 		List<String> fullFileNamesList = diskTool.getFullFileList();
-		
+
+		if (fullFileNamesList.contains(jarName))
+			fullFileNamesList.remove(jarName);
+
 		if (!fullFileNamesList.isEmpty()) {
-			
-			if (fullFileNamesList.contains(jarName))
-				fullFileNamesList.remove(jarName);
-			
+
 			for (String fileName : fullFileNamesList) {
 				saveFromDiskToDb(fileName);
 				journalWriter.appendUploaded(fileName);
-				
+
 			}
 		}
-		
+
 	}
 
 	public void upload(List<String> fileNamesList) throws SQLException, IOException {
@@ -102,19 +111,19 @@ public class SyncExecutor {
 		}
 
 	}
-	
+
 	public void download() throws SQLException, IOException {
-		
+
 		List<String> fullFileNamesList = jdbcDbTool.getFullFileList();
-		
+
 		if (!fullFileNamesList.isEmpty()) {
-			
+
 			for (String fileName : fullFileNamesList) {
 				saveFromDbToDisk(fileName);
 				journalWriter.appendDownloaded(fileName);
 			}
 		}
-		
+
 	}
 
 	public void download(List<String> fileNamesList) throws SQLException, IOException {
@@ -122,14 +131,14 @@ public class SyncExecutor {
 		if (fileNamesList.isEmpty()) {
 			download();
 		} else {
-			
+
 			for (String fileName : fileNamesList) {
 				saveFromDbToDisk(fileName);
 				journalWriter.appendDownloaded(fileName);
 			}
-			
+
 		}
-		
+
 	}
 
 	public void helpCommand() {

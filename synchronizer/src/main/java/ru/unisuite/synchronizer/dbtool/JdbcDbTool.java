@@ -61,20 +61,23 @@ public class JdbcDbTool implements DbTool {
 
 			try (ResultSet resultSet = preparedStatement.executeQuery()) {
 
-				resultSet.next();
+				if (resultSet.isBeforeFirst()) {
 
-				Integer id = resultSet.getInt(DbToolParamName.id);
+					resultSet.next();
 
-				String alias = resultSet.getString(DbToolParamName.alias);
+					Integer id = resultSet.getInt(DbToolParamName.id);
 
-				Timestamp modificationDate = resultSet.getTimestamp(DbToolParamName.modificationDate);
+					String alias = resultSet.getString(DbToolParamName.alias);
 
-				Reader reader = resultSet.getCharacterStream(DbToolParamName.clob);
+					Timestamp modificationDate = resultSet.getTimestamp(DbToolParamName.modificationDate);
 
-				String clob = readToString(reader);
+					Reader reader = resultSet.getCharacterStream(DbToolParamName.clob);
 
-				syncObject = new SyncObject(id, alias, modificationDate, clob);
+					String clob = readToString(reader);
 
+					syncObject = new SyncObject(id, alias, modificationDate, clob);
+
+				}
 			}
 
 		}
