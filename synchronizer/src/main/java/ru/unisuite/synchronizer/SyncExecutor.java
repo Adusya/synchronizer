@@ -9,7 +9,8 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import ru.unisuite.synchronizer.dbtool.DbTool;
-import ru.unisuite.synchronizer.dbtool.JdbcDbTool;
+import ru.unisuite.synchronizer.dbtool.H2DbTool;
+import ru.unisuite.synchronizer.dbtool.OracleDbTool;
 import ru.unisuite.synchronizer.disktool.DiskTool;
 
 public class SyncExecutor {
@@ -24,7 +25,12 @@ public class SyncExecutor {
 
 		journalWriter = new JournalWriter(rootDirectory);
 
-		jdbcDbTool = new JdbcDbTool(properties);
+		if (tag == StandartTag.production || tag == StandartTag.p) {
+			
+			jdbcDbTool = new OracleDbTool(properties);
+		} else {
+			jdbcDbTool = new H2DbTool(properties);
+		}
 
 		diskTool = new DiskTool(rootDirectory);
 	}
@@ -159,6 +165,7 @@ public class SyncExecutor {
 
 		String jarPath = Synchronizer.class.getProtectionDomain().getCodeSource().getLocation().getPath();
 		return new File(jarPath).getParent();
+//		return "C:\\Users\\romanov\\Desktop\\Synchronizer\\SyncFolder";
 	}
 
 	private String getJarName() {
