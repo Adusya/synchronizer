@@ -2,10 +2,13 @@ package ru.unisuite.synchronizer.disktool;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.Timestamp;
@@ -36,9 +39,9 @@ public class DiskTool {
 		String fileFullPath = rootDirectory + File.separator + fileName;
 
 		File file = new File(fileFullPath);
-		
+
 		SyncObject syncObject = null;
-		
+
 		if (file.exists() && file.isFile()) {
 			Timestamp modificationDate = new Timestamp(file.lastModified());
 			String clob = readFileToString(fileFullPath);
@@ -54,9 +57,11 @@ public class DiskTool {
 
 		File syncFile = new File(rootDirectory + File.separator + syncObject.getAlias());
 
-		FileWriter writer = new FileWriter(syncFile);
-		writer.write(syncObject.getClob());
-		writer.close();
+		try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(syncFile),
+				StandardCharsets.UTF_8)) {
+
+			writer.write(syncObject.getClob());
+		}
 
 		syncFile.setLastModified(syncObject.getTimestamp().getTime());
 
@@ -72,38 +77,38 @@ public class DiskTool {
 
 		return targetString;
 	}
-	
+
 	public List<String> getFullFileList() {
-		
+
 		List<String> arrayListFiles = new ArrayList<>();
-		
+
 		File rootFolder = new File(rootDirectory);
-		
+
 		File[] listFiles = rootFolder.listFiles();
-		
-		for (File file: listFiles) {
+
+		for (File file : listFiles) {
 			if (file.isFile())
 				arrayListFiles.add(file.getName());
-			
+
 		}
-		
+
 		return arrayListFiles;
-		
+
 	}
-	
+
 	public String readFileToString(String fileName) throws IOException {
 
-        StringBuilder sb = new StringBuilder();
+		StringBuilder sb = new StringBuilder();
 
-        //read file into stream, try-with-resources
-        try (Stream<String> stream = Files.lines(Paths.get(fileName))) {
+		// read file into stream, try-with-resources
+		try (Stream<String> stream = Files.lines(Paths.get(fileName))) {
 
-            stream.forEach(line -> {
-                sb.append(line + "\n"); // add space so that lines don't stick to each other
-            });
+			stream.forEach(line -> {
+				sb.append(line + "\n"); // add space so that lines don't stick to each other
+			});
 
-        }
+		}
 
-        return sb.toString();
-    }
+		return sb.toString();
+	}
 }
