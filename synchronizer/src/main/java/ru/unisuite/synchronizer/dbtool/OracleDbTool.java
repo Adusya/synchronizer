@@ -17,16 +17,16 @@ import java.util.logging.Logger;
 import ru.unisuite.synchronizer.SyncObject;
 import ru.unisuite.synchronizer.SyncProperties;
 
-public class JdbcDbTool implements DbTool {
+public class OracleDbTool implements DbTool {
 
 	private DbToolProperties dbProperties;
 
-	public JdbcDbTool(SyncProperties properties) {
+	public OracleDbTool(SyncProperties properties) {
 
 		dbProperties = new DbToolProperties(properties);
 	}
 
-	Logger logger = Logger.getLogger(JdbcDbTool.class.getName());
+	Logger logger = Logger.getLogger(OracleDbTool.class.getName());
 
 	public Connection getConnection() {
 
@@ -65,13 +65,13 @@ public class JdbcDbTool implements DbTool {
 
 					resultSet.next();
 
-					Integer id = resultSet.getInt(DbToolParamName.id);
+					Integer id = resultSet.getInt(dbProperties.getId());
 
-					String alias = resultSet.getString(DbToolParamName.alias);
+					String alias = resultSet.getString(dbProperties.getAlias());
 
-					Timestamp modificationDate = resultSet.getTimestamp(DbToolParamName.modificationDate);
+					Timestamp modificationDate = resultSet.getTimestamp(dbProperties.getModificationDate());
 
-					Reader reader = resultSet.getCharacterStream(DbToolParamName.clob);
+					Reader reader = resultSet.getCharacterStream(dbProperties.getClob());
 
 					String clob = readToString(reader);
 
@@ -89,8 +89,21 @@ public class JdbcDbTool implements DbTool {
 	public void saveSyncObjectToDB(SyncObject syncObject) throws SQLException, IOException {
 
 		final String mergeSQLQuery = String.format(
-				"MERGE INTO %s KEY(%s) VALUES((select %s from %s where %s = ?), ?, ?, ?)", dbProperties.getDbName(),
-				dbProperties.getAlias(), dbProperties.getId(), dbProperties.getDbName(), dbProperties.getAlias());
+				"MERGE INTO %s dbt \r\n" + 
+				"USING(select (\r\n" + 
+				"select %s from %s where %s=:ALIAS) as ID\r\n" + 
+				", :ALIAS as ALIAS\r\n" + 
+				", :modification_date as modification_date\r\n" + 
+				", :Data as Data from DUAL) src \r\n" + 
+				"ON (dbt.%s = src.ID) \r\n" + 
+				"WHEN MATCHED THEN \r\n" + 
+				"UPDATE SET dbt.%s=src.modification_date, dbt.%s=src.Data \r\n" + 
+				"WHEN NOT MATCHED THEN \r\n" + 
+				"INSERT (dbt.%s, dbt.%s, dbt.%s) \r\n" + 
+				"VALUES(src.ALIAS,src.modification_date,src.Data)",
+				dbProperties.getDbName(), dbProperties.getId(), dbProperties.getDbName(), dbProperties.getAlias(), dbProperties.getId(), dbProperties.getModificationDate(),
+				dbProperties.getClob(), dbProperties.getAlias(),
+				dbProperties.getModificationDate(), dbProperties.getClob());
 
 		String clob = syncObject.getClob();
 
