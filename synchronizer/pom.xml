@@ -18,9 +18,7 @@
 		<java.version>1.8</java.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-		<ojdbc.version>12.2.0.1</ojdbc.version>
 		<h2database.version>1.4.197</h2database.version>
-
 		<maven.compiler.version>3.5.1</maven.compiler.version>
 	</properties>
 
@@ -55,7 +53,6 @@
 		<dependency>
 			<groupId>com.oracle.jdbc</groupId>
 			<artifactId>ojdbc8</artifactId>
-			<version>${ojdbc.version}</version>
 		</dependency>
 	</dependencies>
 	<build>
