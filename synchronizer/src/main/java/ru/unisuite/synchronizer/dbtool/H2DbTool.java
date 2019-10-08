@@ -75,7 +75,7 @@ public class H2DbTool implements DbTool {
 
 					String clob = readToString(reader);
 
-					syncObject = new SyncObject(id, alias, modificationDate, clob);
+					syncObject = new SyncObject(null, alias, clob);
 
 				}
 			}
@@ -100,7 +100,6 @@ public class H2DbTool implements DbTool {
 			int i = 1;
 			preparedStatement.setString(i++, syncObject.getAlias());
 			preparedStatement.setString(i++, syncObject.getAlias());
-			preparedStatement.setTimestamp(i++, syncObject.getTimestamp());
 			preparedStatement.setClob(i++, clobReader);
 			preparedStatement.executeUpdate();
 		}
@@ -142,6 +141,24 @@ public class H2DbTool implements DbTool {
 		}
 
 		return targetString;
+	}
+
+	@Override
+	public boolean exists(String alias) throws SQLException {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public void createSyncObjectInDB(SyncObject syncObject) throws SQLException, IOException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void updateSyncObjectInDB(SyncObject syncObject) throws SQLException, IOException {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

@@ -14,10 +14,14 @@ public interface DbTool {
 	
 	public SyncObject fetchSyncObjectFromDB(String fileName) throws SQLException, IOException;
 	
-	public void saveSyncObjectToDB(SyncObject syncObject) throws SQLException, IOException;
+	public void createSyncObjectInDB(SyncObject syncObject) throws SQLException, IOException;
 	
 	public String readToString(Reader reader) throws IOException;
 	
 	public List<String> getFullFileList() throws SQLException;
+	
+	public boolean exists(String alias) throws SQLException;
+	
+	public void updateSyncObjectInDB(SyncObject syncObject) throws SQLException, IOException;
 
 }
