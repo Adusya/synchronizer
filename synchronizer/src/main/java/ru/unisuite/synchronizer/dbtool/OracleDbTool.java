@@ -8,7 +8,6 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -46,16 +45,18 @@ public class OracleDbTool implements DbTool {
 
 	}
 
+	static String selectSQLQuery = "select t.id_templates, t.name, tv.note, td.template, td.use_sign, t.alias, t.qualifier\r\n" + 
+			", t.public_sign, td.rowid from templates_data_rs td, templates_rs t, template_versions_rs tv where tv.id_templates = t.id_templates\r\n" + 
+			"and td.id_template_versions = tv.id_template_versions";
+	
 	public SyncObject fetchSyncObjectFromDB(String fileName) throws SQLException, IOException {
-
-		final String selectSQKQuery = String.format("SELECT %s, %s, %s, %s FROM %s  where %s = ?", dbProperties.getId(),
-				dbProperties.getAlias(), dbProperties.getModificationDate(), dbProperties.getClob(),
-				dbProperties.getDbName(), dbProperties.getAlias());
 
 		SyncObject syncObject = null;
 
+		String parameterizedSelectSQLQuery = selectSQLQuery + " and t.alias = ?";
+		
 		try (Connection connection = getConnection();
-				PreparedStatement preparedStatement = (PreparedStatement) connection.prepareStatement(selectSQKQuery)) {
+				PreparedStatement preparedStatement = (PreparedStatement) connection.prepareStatement(parameterizedSelectSQLQuery)) {
 			int i = 1;
 			preparedStatement.setString(i++, fileName);
 
@@ -65,17 +66,19 @@ public class OracleDbTool implements DbTool {
 
 					resultSet.next();
 
-					Integer id = resultSet.getInt(dbProperties.getId());
+					String alias = resultSet.getString("ALIAS");
 
-					String alias = resultSet.getString(dbProperties.getAlias());
+					String clob;
 
-					Timestamp modificationDate = resultSet.getTimestamp(dbProperties.getModificationDate());
+					try (Reader reader = resultSet.getCharacterStream("TEMPLATE")) {
+						if (reader == null) {
+							return null;
+						}
+						
+						clob = readToString(reader);
+					}
 
-					Reader reader = resultSet.getCharacterStream(dbProperties.getClob());
-
-					String clob = readToString(reader);
-
-					syncObject = new SyncObject(id, alias, modificationDate, clob);
+					syncObject = new SyncObject(null, alias, clob);
 
 				}
 			}
@@ -85,56 +88,55 @@ public class OracleDbTool implements DbTool {
 		return syncObject;
 
 	}
+	
+	public void createSyncObjectInDB(SyncObject syncObject) throws SQLException, IOException {
 
-	public void saveSyncObjectToDB(SyncObject syncObject) throws SQLException, IOException {
-
-		final String mergeSQLQuery = String.format(
-				"MERGE INTO %s dbt \r\n" + 
-				"USING(select (\r\n" + 
-				"select %s from %s where %s=:ALIAS) as ID\r\n" + 
-				", :ALIAS as ALIAS\r\n" + 
-				", :modification_date as modification_date\r\n" + 
-				", :Data as Data from DUAL) src \r\n" + 
-				"ON (dbt.%s = src.ID) \r\n" + 
-				"WHEN MATCHED THEN \r\n" + 
-				"UPDATE SET dbt.%s=src.modification_date, dbt.%s=src.Data \r\n" + 
-				"WHEN NOT MATCHED THEN \r\n" + 
-				"INSERT (dbt.%s, dbt.%s, dbt.%s) \r\n" + 
-				"VALUES(src.ALIAS,src.modification_date,src.Data)",
-				dbProperties.getDbName(), dbProperties.getId(), dbProperties.getDbName(), dbProperties.getAlias(), dbProperties.getId(), dbProperties.getModificationDate(),
-				dbProperties.getClob(), dbProperties.getAlias(),
-				dbProperties.getModificationDate(), dbProperties.getClob());
-
+		String createSQLQuery = "select lxse_template_rs.temp_create_birt_template('', '', ?)";
+		
 		String clob = syncObject.getClob();
 
 		try (Connection connection = getConnection();
-				PreparedStatement preparedStatement = (PreparedStatement) connection.prepareStatement(mergeSQLQuery);
+				PreparedStatement preparedStatement = (PreparedStatement) connection.prepareStatement(createSQLQuery);
 				Reader clobReader = new StringReader(clob)) {
 			int i = 1;
 			preparedStatement.setString(i++, syncObject.getAlias());
-			preparedStatement.setString(i++, syncObject.getAlias());
-			preparedStatement.setTimestamp(i++, syncObject.getTimestamp());
-			preparedStatement.setClob(i++, clobReader);
 			preparedStatement.executeUpdate();
 		}
+		
+		updateSyncObjectInDB(syncObject);
 
+	}
+	
+	public void updateSyncObjectInDB(SyncObject syncObject) throws SQLException, IOException {
+		
+		String updateSQLQuery = "update templates_data_rs td set td.template = ? where td.id_template_versions = (select tv.id_template_versions \r\n" + 
+				"from template_versions_rs tv, templates_rs t where tv.id_templates = t.id_templates and t.alias = ?)";
+		
+		String clob = syncObject.getClob();
+
+		try (Connection connection = getConnection();
+				PreparedStatement preparedStatement = (PreparedStatement) connection.prepareStatement(updateSQLQuery);
+				Reader clobReader = new StringReader(clob)) {
+			int i = 1;
+			preparedStatement.setClob(i++, clobReader);
+			preparedStatement.setString(i++, syncObject.getAlias());
+			preparedStatement.executeUpdate();
+		}
+		
 	}
 
 	public List<String> getFullFileList() throws SQLException {
-
-		final String selectSQLQuery = String.format("select %s from %s", dbProperties.getAlias(),
-				dbProperties.getDbName());
 
 		List<String> array = new ArrayList<>();
 
 		try (Connection connection = getConnection();
 				PreparedStatement preparedStatement = (PreparedStatement) connection.prepareStatement(selectSQLQuery)) {
-
+			
 			try (ResultSet resultSet = preparedStatement.executeQuery()) {
 
 				while (resultSet.next() != false) {
 
-					array.add(resultSet.getString(DbToolParamName.alias));
+					array.add(resultSet.getString("ALIAS"));
 
 				}
 
@@ -148,13 +150,33 @@ public class OracleDbTool implements DbTool {
 
 	public String readToString(Reader reader) throws IOException {
 
-		int intValueOfChar;
-		String targetString = "";
-		while ((intValueOfChar = reader.read()) != -1) {
-			targetString += (char) intValueOfChar;
-		}
+		char[] arr = new char[8 * 1024];
+	    StringBuilder buffer = new StringBuilder();
+	    int numCharsRead;
+	    while ((numCharsRead = reader.read(arr, 0, arr.length)) != -1) {
+	        buffer.append(arr, 0, numCharsRead);
+	    }
 
-		return targetString;
+	    return buffer.toString();
+	}
+	
+	public boolean exists(String alias) throws SQLException {
+
+		String parameterizedSelectSQLQuery = selectSQLQuery + " and t.alias = ?";
+		
+		try (Connection connection = getConnection();
+				PreparedStatement preparedStatement = (PreparedStatement) connection.prepareStatement(parameterizedSelectSQLQuery)) {
+			int i = 1;
+			preparedStatement.setString(i++, alias);
+
+			try (ResultSet resultSet = preparedStatement.executeQuery()) {
+
+				return resultSet.isBeforeFirst();
+				
+			}
+
+		}
+		
 	}
 
 }
