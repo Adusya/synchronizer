@@ -7,7 +7,7 @@ import java.util.List;
 
 public class Synchronizer {
 
-	private final static String defaultTag = "development";
+	private final static String defaultTag = "p";
 	private final static String defaultCommand = "download";
 
 	// В качестве аргумента сначала приходит действие, которое необходимо выполнить,
@@ -42,9 +42,6 @@ public class Synchronizer {
 			break;
 		case download:
 			executor.download(fileNamesList);
-			break;
-		case sync:
-			executor.sync(fileNamesList);
 			break;
 		case help:
 			executor.helpCommand();

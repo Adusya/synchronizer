@@ -1,7 +1,7 @@
 package ru.unisuite.synchronizer;
 
 public enum StandartCommand {
-	sync, upload, download, help;
+	upload, download, help;
 
 	public static boolean contains(String argument) {
 		

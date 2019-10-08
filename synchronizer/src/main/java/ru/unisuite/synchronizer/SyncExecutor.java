@@ -35,8 +35,6 @@ public class SyncExecutor {
 		diskTool = new DiskTool(rootDirectory);
 	}
 
-	private static Logger logger = Logger.getLogger(Synchronizer.class.getName());
-
 	private JournalWriter journalWriter;
 
 	private String rootDirectory;
@@ -46,13 +44,19 @@ public class SyncExecutor {
 	private DbTool jdbcDbTool;
 
 	public void saveFromDiskToDb(String fileName) throws SQLException, IOException {
-
+		
 		SyncObject syncObject = getSyncObjectFromDisk(fileName);
-
+		
 		if (syncObject == null) {
 			System.out.println(String.format("File %s does not exist", fileName));
 		} else {
-			jdbcDbTool.saveSyncObjectToDB(syncObject);
+			
+			if (jdbcDbTool.exists(fileName)) {
+				jdbcDbTool.updateSyncObjectInDB(syncObject);
+			} else {
+				jdbcDbTool.createSyncObjectInDB(syncObject);
+			}
+			
 		}
 
 	}
@@ -63,8 +67,15 @@ public class SyncExecutor {
 
 		if (syncObject == null) {
 			System.out.println(String.format("File %s does not exist", fileName));
-		} else {
-			diskTool.saveSyncObjectToDisk(syncObject);
+		} else {			
+			
+			if (syncObject.getAlias() != null) {
+				diskTool.saveSyncObjectToDisk(syncObject);
+			} else {
+				System.out.println("Alias can't be null");
+			}
+			
+			
 		}
 		
 	}
@@ -72,14 +83,6 @@ public class SyncExecutor {
 	private SyncObject getSyncObjectFromDisk(String fileName) throws IOException {
 
 		return diskTool.getSyncObjectByName(fileName);
-
-	}
-
-	public void sync() {
-
-	}
-
-	public void sync(List<String> fileNamesList) {
 
 	}
 
@@ -121,11 +124,12 @@ public class SyncExecutor {
 	public void download() throws SQLException, IOException {
 
 		List<String> fullFileNamesList = jdbcDbTool.getFullFileList();
-
+		
 		if (!fullFileNamesList.isEmpty()) {
 
 			for (String fileName : fullFileNamesList) {
 				saveFromDbToDisk(fileName);
+			
 				journalWriter.appendDownloaded(fileName);
 			}
 		}
@@ -155,7 +159,6 @@ public class SyncExecutor {
 		builder.append("List of commands: \n");
 		builder.append("   upload      uplouad all files from disk to db \n");
 		builder.append("   download    download all files from db to disk \n");
-		builder.append("   sync        sync(under construction) \n");
 
 		System.out.println(builder);
 
@@ -164,8 +167,8 @@ public class SyncExecutor {
 	private String getRootDirectory() {
 
 		String jarPath = Synchronizer.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-		return new File(jarPath).getParent();
-//		return "C:\\Users\\romanov\\Desktop\\Synchronizer\\SyncFolder";
+//		return new File(jarPath).getParent();
+		return "C:\\Users\\romanov\\Desktop\\Synchronizer\\SyncFolder";
 	}
 
 	private String getJarName() {
