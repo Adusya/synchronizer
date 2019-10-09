@@ -75,7 +75,7 @@ public class H2DbTool implements DbTool {
 
 					String clob = readToString(reader);
 
-					syncObject = new SyncObject(null, alias, clob);
+					syncObject = new SyncObject(null, alias, clob, null);
 
 				}
 			}

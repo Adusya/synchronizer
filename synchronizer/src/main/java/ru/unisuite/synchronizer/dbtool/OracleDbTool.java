@@ -77,8 +77,10 @@ public class OracleDbTool implements DbTool {
 						
 						clob = readToString(reader);
 					}
+					
+					String description = resultSet.getString("NAME");
 
-					syncObject = new SyncObject(null, alias, clob);
+					syncObject = new SyncObject(null, alias, clob, description);
 
 				}
 			}
@@ -91,7 +93,7 @@ public class OracleDbTool implements DbTool {
 	
 	public void createSyncObjectInDB(SyncObject syncObject) throws SQLException, IOException {
 
-		String createSQLQuery = "select lxse_template_rs.temp_create_birt_template('', '', ?)";
+		String createSQLQuery = "select lxse_template_rs.temp_create_birt_template(?, '', ?) from dual";
 		
 		String clob = syncObject.getClob();
 
@@ -99,6 +101,7 @@ public class OracleDbTool implements DbTool {
 				PreparedStatement preparedStatement = (PreparedStatement) connection.prepareStatement(createSQLQuery);
 				Reader clobReader = new StringReader(clob)) {
 			int i = 1;
+			preparedStatement.setString(i++, syncObject.getDescription());
 			preparedStatement.setString(i++, syncObject.getAlias());
 			preparedStatement.executeUpdate();
 		}

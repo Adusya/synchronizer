@@ -1,17 +1,13 @@
 package ru.unisuite.synchronizer.disktool;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
@@ -27,7 +23,6 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
@@ -56,17 +51,17 @@ public class DiskTool {
 
 		String fileFullPath = rootDirectory + File.separator + alias + reportExtention;
 
+		deleteTagValue(fileFullPath, "encrypted-property");
+		
 		File file = new File(fileFullPath);
 
-//		diskTool.deleteTagValue(fileFullPath, "encrypted-property");
-		
 		SyncObject syncObject = null;
 
 		if (file.exists() && file.isFile()) {
 //			Timestamp modificationDate = new Timestamp(file.lastModified());
 			String clob = readFileToString(fileFullPath);
 
-			syncObject = new SyncObject(null, alias, clob);
+			syncObject = new SyncObject(null, alias, clob, null);
 		}
 
 		return syncObject;
