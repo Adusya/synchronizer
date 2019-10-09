@@ -25,23 +25,25 @@ public class Synchronizer {
 		} else {
 			tag = StandartTag.valueOf(defaultTag);
 		}
+		
+		SyncExecutor executor = new SyncExecutor(tag);
 
 		if (command != null) {
 			conCommand = true;
 		} else {
-			command = StandartCommand.valueOf(defaultCommand);
+			command = StandartCommand.help;// = StandartCommand.valueOf(defaultCommand);
 		}
-
-		SyncExecutor executor = new SyncExecutor(tag);
 
 		List<String> fileNamesList = getFileNamesList(args, conTag, conCommand);
 
 		switch (command) {
 		case upload:
 			executor.upload(fileNamesList);
+			System.out.println("upload done.");
 			break;
 		case download:
 			executor.download(fileNamesList);
+			System.out.println("download done.");
 			break;
 		case help:
 			executor.helpCommand();
