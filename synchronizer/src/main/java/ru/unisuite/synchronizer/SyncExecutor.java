@@ -6,8 +6,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.logging.Logger;
-
+import java.util.Scanner;
 import ru.unisuite.synchronizer.dbtool.DbTool;
 import ru.unisuite.synchronizer.dbtool.H2DbTool;
 import ru.unisuite.synchronizer.dbtool.OracleDbTool;
@@ -54,6 +53,9 @@ public class SyncExecutor {
 			if (jdbcDbTool.exists(fileName)) {
 				jdbcDbTool.updateSyncObjectInDB(syncObject);
 			} else {
+				
+				String description = askForValue("set description for file " + syncObject.getAlias() + ": ");
+				syncObject.setDescription(description);
 				jdbcDbTool.createSyncObjectInDB(syncObject);
 			}
 			
@@ -163,12 +165,18 @@ public class SyncExecutor {
 		System.out.println(builder);
 
 	}
+	
+	public void noCommand () {
+		
+		System.out.println("Set the command");
+		
+	}
 
 	private String getRootDirectory() {
 
 		String jarPath = Synchronizer.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-//		return new File(jarPath).getParent();
-		return "C:\\Users\\romanov\\Desktop\\Synchronizer\\SyncFolder";
+		return new File(jarPath).getParent();
+//		return "C:\\Users\\romanov\\Desktop\\Synchronizer\\SyncFolder";
 	}
 
 	private String getJarName() {
@@ -181,6 +189,17 @@ public class SyncExecutor {
 	public void close() throws IOException {
 		if (journalWriter != null)
 			journalWriter.close();
+	}
+	
+	public String askForValue(String message) {
+		
+		System.out.println(message);
+		
+		try (Scanner in = new Scanner(System.in)) {
+			return in.nextLine();
+		}
+		
+        
 	}
 
 }
