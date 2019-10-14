@@ -14,11 +14,16 @@ import ru.unisuite.synchronizer.disktool.DiskTool;
 
 public class SyncExecutor {
 
+	private String cmdCharset = "Cp866";
+	
 	public SyncExecutor(StandartTag tag)
 			throws SynchronizerPropertiesException, UnsupportedEncodingException, FileNotFoundException {
 
 		SyncProperties properties = new SyncProperties(tag);
 
+		if (properties.getEncodingCharset() != null && !properties.getEncodingCharset().equals(""))
+			cmdCharset = properties.getEncodingCharset();
+		
 		rootDirectory = getRootDirectory();
 		jarName = getJarName();
 
@@ -32,6 +37,7 @@ public class SyncExecutor {
 		}
 
 		diskTool = new DiskTool(rootDirectory);
+		
 	}
 
 	private JournalWriter journalWriter;
@@ -195,10 +201,14 @@ public class SyncExecutor {
 		
 		System.out.println(message);
 		
+		String outString = null;
 		try (Scanner in = new Scanner(System.in)) {
-			return in.nextLine();
+			outString = new String(in.nextLine().getBytes(), cmdCharset);
+		} catch (UnsupportedEncodingException e) {
+			System.out.println(e.getMessage());
 		}
 		
+		return outString;
         
 	}
 

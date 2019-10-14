@@ -36,6 +36,8 @@ public class SyncProperties {
 	private String modificationDate;
 	private String clob;
 	
+	private String encodingCharset;
+	
 	private final String developmentConfigFile = "development.properties";
 	
 	private final String productionConfigFile = "production.properties";
@@ -79,6 +81,10 @@ public class SyncProperties {
 			
 			String clob = prop.getProperty(PropertiesParamName.CLOB);
 			this.clob = clob;
+			
+			String encodingCharset = prop.getProperty(PropertiesParamName.CHARSET);
+			this.encodingCharset = encodingCharset;
+
 
 		} catch (IOException e) {
 			// e.printStackTrace();
@@ -128,4 +134,9 @@ public class SyncProperties {
 	public String getClob() {
 		return clob;
 	}
+	
+	public String getEncodingCharset() {
+		return encodingCharset;
+	}
+	
 }
