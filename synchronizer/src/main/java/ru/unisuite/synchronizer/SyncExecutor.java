@@ -15,7 +15,9 @@ import ru.unisuite.synchronizer.disktool.DiskTool;
 public class SyncExecutor {
 
 	private String cmdCharset = "Cp866";
-	
+
+	private Scanner scanner;
+
 	public SyncExecutor(StandartTag tag)
 			throws SynchronizerPropertiesException, UnsupportedEncodingException, FileNotFoundException {
 
@@ -23,21 +25,23 @@ public class SyncExecutor {
 
 		if (properties.getEncodingCharset() != null && !properties.getEncodingCharset().equals(""))
 			cmdCharset = properties.getEncodingCharset();
-		
+
 		rootDirectory = getRootDirectory();
 		jarName = getJarName();
 
 		journalWriter = new JournalWriter(rootDirectory);
 
 		if (tag == StandartTag.production || tag == StandartTag.p) {
-			
+
 			jdbcDbTool = new OracleDbTool(properties);
 		} else {
 			jdbcDbTool = new H2DbTool(properties);
 		}
 
 		diskTool = new DiskTool(rootDirectory);
-		
+
+		scanner = new Scanner(System.in);
+
 	}
 
 	private JournalWriter journalWriter;
@@ -49,22 +53,22 @@ public class SyncExecutor {
 	private DbTool jdbcDbTool;
 
 	public void saveFromDiskToDb(String fileName) throws SQLException, IOException {
-		
+
 		SyncObject syncObject = getSyncObjectFromDisk(fileName);
-		
+
 		if (syncObject == null) {
 			System.out.println(String.format("File %s does not exist", fileName));
 		} else {
-			
+
 			if (jdbcDbTool.exists(fileName)) {
 				jdbcDbTool.updateSyncObjectInDB(syncObject);
 			} else {
-				
+
 				String description = askForValue("set description for file " + syncObject.getAlias() + ": ");
 				syncObject.setDescription(description);
-				jdbcDbTool.createSyncObjectInDB(syncObject);
+				 jdbcDbTool.createSyncObjectInDB(syncObject);
 			}
-			
+
 		}
 
 	}
@@ -75,17 +79,16 @@ public class SyncExecutor {
 
 		if (syncObject == null) {
 			System.out.println(String.format("File %s does not exist", fileName));
-		} else {			
-			
+		} else {
+
 			if (syncObject.getAlias() != null) {
 				diskTool.saveSyncObjectToDisk(syncObject);
 			} else {
 				System.out.println("Alias can't be null");
 			}
-			
-			
+
 		}
-		
+
 	}
 
 	private SyncObject getSyncObjectFromDisk(String fileName) throws IOException {
@@ -132,12 +135,12 @@ public class SyncExecutor {
 	public void download() throws SQLException, IOException {
 
 		List<String> fullFileNamesList = jdbcDbTool.getFullFileList();
-		
+
 		if (!fullFileNamesList.isEmpty()) {
 
 			for (String fileName : fullFileNamesList) {
 				saveFromDbToDisk(fileName);
-			
+
 				journalWriter.appendDownloaded(fileName);
 			}
 		}
@@ -171,18 +174,18 @@ public class SyncExecutor {
 		System.out.println(builder);
 
 	}
-	
-	public void noCommand () {
-		
+
+	public void noCommand() {
+
 		System.out.println("Set the command");
-		
+
 	}
 
 	private String getRootDirectory() {
 
 		String jarPath = Synchronizer.class.getProtectionDomain().getCodeSource().getLocation().getPath();
 		return new File(jarPath).getParent();
-//		return "C:\\Users\\romanov\\Desktop\\Synchronizer\\SyncFolder";
+		// return "C:\\Users\\romanov\\Desktop\\Synchronizer\\SyncFolder";
 	}
 
 	private String getJarName() {
@@ -195,21 +198,25 @@ public class SyncExecutor {
 	public void close() throws IOException {
 		if (journalWriter != null)
 			journalWriter.close();
+
+		if (scanner != null)
+			scanner.close();
 	}
-	
+
 	public String askForValue(String message) {
-		
+
 		System.out.println(message);
-		
+
 		String outString = null;
-		try (Scanner in = new Scanner(System.in)) {
-			outString = new String(in.nextLine().getBytes(), cmdCharset);
+
+		try {
+			outString = new String(scanner.nextLine().getBytes(), cmdCharset);
 		} catch (UnsupportedEncodingException e) {
 			System.out.println(e.getMessage());
 		}
-		
+
 		return outString;
-        
+
 	}
 
 }
