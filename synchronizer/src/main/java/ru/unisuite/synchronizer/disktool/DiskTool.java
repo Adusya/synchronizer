@@ -32,7 +32,7 @@ import ru.unisuite.synchronizer.SyncObject;
 public class DiskTool {
 
 	private String rootDirectory;
-	
+
 	private String reportExtention = ".rptdesign";
 
 	public DiskTool(String rootDirectory) {
@@ -52,13 +52,13 @@ public class DiskTool {
 		String fileFullPath = rootDirectory + File.separator + alias + reportExtention;
 
 		deleteTagValue(fileFullPath, "encrypted-property");
-		
+
 		File file = new File(fileFullPath);
 
 		SyncObject syncObject = null;
 
 		if (file.exists() && file.isFile()) {
-//			Timestamp modificationDate = new Timestamp(file.lastModified());
+			// Timestamp modificationDate = new Timestamp(file.lastModified());
 			String clob = readFileToString(fileFullPath);
 
 			syncObject = new SyncObject(null, alias, clob, null);
@@ -78,20 +78,20 @@ public class DiskTool {
 			writer.write(syncObject.getClob());
 		}
 
-//		syncFile.setLastModified(syncObject.getTimestamp().getTime());
+		// syncFile.setLastModified(syncObject.getTimestamp().getTime());
 
 	}
 
 	public String readToString(Reader reader) throws IOException {
 
 		char[] arr = new char[8 * 1024];
-	    StringBuilder buffer = new StringBuilder();
-	    int numCharsRead;
-	    while ((numCharsRead = reader.read(arr, 0, arr.length)) != -1) {
-	        buffer.append(arr, 0, numCharsRead);
-	    }
+		StringBuilder buffer = new StringBuilder();
+		int numCharsRead;
+		while ((numCharsRead = reader.read(arr, 0, arr.length)) != -1) {
+			buffer.append(arr, 0, numCharsRead);
+		}
 
-	    return buffer.toString();
+		return buffer.toString();
 	}
 
 	public List<String> getFullFileList() {
@@ -104,7 +104,10 @@ public class DiskTool {
 
 		for (File file : listFiles) {
 			if (file.isFile())
-				arrayListFiles.add(file.getName());
+				if (file.getName().endsWith(reportExtention))
+					arrayListFiles.add(file.getName().replaceAll(reportExtention, ""));
+				else
+					arrayListFiles.add(file.getName());
 
 		}
 
@@ -116,7 +119,6 @@ public class DiskTool {
 
 		StringBuilder sb = new StringBuilder();
 
-		// read file into stream, try-with-resources
 		try (Stream<String> stream = Files.lines(Paths.get(fileName))) {
 
 			stream.forEach(line -> {
@@ -134,9 +136,11 @@ public class DiskTool {
 
 			DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
 			DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+			
 			Document doc = docBuilder.parse(fileName);
+
 			doc.getDocumentElement().normalize();
-					
+
 			Element dataSource = (Element) doc.getElementsByTagName("data-sources").item(0);
 
 			NodeList list = dataSource.getElementsByTagName(tagName);
@@ -154,13 +158,13 @@ public class DiskTool {
 			transformer.transform(source, result);
 
 		} catch (ParserConfigurationException pce) {
-			pce.printStackTrace();
+			System.out.println(String.format("Can't edit tag %s in file %s. Cause: %s", tagName, fileName, pce.getMessage()));
 		} catch (TransformerException tfe) {
-			tfe.printStackTrace();
+			System.out.println(String.format("Can't edit tag %s in file %s. Cause: %s", tagName, fileName, tfe.getMessage()));
 		} catch (IOException ioe) {
-			ioe.printStackTrace();
+			System.out.println(String.format("Can't edit tag %s in file %s. Cause: %s", tagName, fileName, ioe.getMessage()));
 		} catch (SAXException sae) {
-			sae.printStackTrace();
+			System.out.println(String.format("Can't edit tag %s in file %s. Cause: %s", tagName, fileName, sae.getMessage()));
 		}
 
 	}
