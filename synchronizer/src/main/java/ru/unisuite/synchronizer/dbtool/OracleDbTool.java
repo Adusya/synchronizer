@@ -45,18 +45,19 @@ public class OracleDbTool implements DbTool {
 
 	}
 
-	static String selectSQLQuery = "select t.id_templates, t.name, tv.note, td.template, td.use_sign, t.alias, t.qualifier\r\n" + 
-			", t.public_sign, td.rowid from templates_data_rs td, templates_rs t, template_versions_rs tv where tv.id_templates = t.id_templates\r\n" + 
-			"and td.id_template_versions = tv.id_template_versions";
-	
+	static String selectSQLQuery = "select t.id_templates, t.name, tv.note, td.template, td.use_sign, t.alias, t.qualifier\r\n"
+			+ ", t.public_sign, td.rowid from templates_data_rs td, templates_rs t, template_versions_rs tv where tv.id_templates = t.id_templates\r\n"
+			+ "and td.id_template_versions = tv.id_template_versions";
+
 	public SyncObject fetchSyncObjectFromDB(String fileName) throws SQLException, IOException {
 
 		SyncObject syncObject = null;
 
 		String parameterizedSelectSQLQuery = selectSQLQuery + " and t.alias = ?";
-		
+
 		try (Connection connection = getConnection();
-				PreparedStatement preparedStatement = (PreparedStatement) connection.prepareStatement(parameterizedSelectSQLQuery)) {
+				PreparedStatement preparedStatement = (PreparedStatement) connection
+						.prepareStatement(parameterizedSelectSQLQuery)) {
 			int i = 1;
 			preparedStatement.setString(i++, fileName);
 
@@ -74,10 +75,10 @@ public class OracleDbTool implements DbTool {
 						if (reader == null) {
 							return null;
 						}
-						
+
 						clob = readToString(reader);
 					}
-					
+
 					String description = resultSet.getString("NAME");
 
 					syncObject = new SyncObject(null, alias, clob, description);
@@ -90,11 +91,11 @@ public class OracleDbTool implements DbTool {
 		return syncObject;
 
 	}
-	
+
 	public void createSyncObjectInDB(SyncObject syncObject) throws SQLException, IOException {
 
 		String createSQLQuery = "select lxse_template_rs.temp_create_birt_template(?, '', ?) from dual";
-		
+
 		String clob = syncObject.getClob();
 
 		try (Connection connection = getConnection();
@@ -105,16 +106,16 @@ public class OracleDbTool implements DbTool {
 			preparedStatement.setString(i++, syncObject.getAlias());
 			preparedStatement.executeUpdate();
 		}
-		
+
 		updateSyncObjectInDB(syncObject);
 
 	}
-	
+
 	public void updateSyncObjectInDB(SyncObject syncObject) throws SQLException, IOException {
-		
-		String updateSQLQuery = "update templates_data_rs td set td.template = ? where td.id_template_versions = (select tv.id_template_versions \r\n" + 
-				"from template_versions_rs tv, templates_rs t where tv.id_templates = t.id_templates and t.alias = ?)";
-		
+
+		String updateSQLQuery = "update templates_data_rs td set td.template = ? where td.id_template_versions = (select tv.id_template_versions \r\n"
+				+ "from template_versions_rs tv, templates_rs t where tv.id_templates = t.id_templates and t.alias = ?)";
+
 		String clob = syncObject.getClob();
 
 		try (Connection connection = getConnection();
@@ -125,7 +126,7 @@ public class OracleDbTool implements DbTool {
 			preparedStatement.setString(i++, syncObject.getAlias());
 			preparedStatement.executeUpdate();
 		}
-		
+
 	}
 
 	public List<String> getFullFileList() throws SQLException {
@@ -134,7 +135,7 @@ public class OracleDbTool implements DbTool {
 
 		try (Connection connection = getConnection();
 				PreparedStatement preparedStatement = (PreparedStatement) connection.prepareStatement(selectSQLQuery)) {
-			
+
 			try (ResultSet resultSet = preparedStatement.executeQuery()) {
 
 				while (resultSet.next() != false) {
@@ -154,32 +155,33 @@ public class OracleDbTool implements DbTool {
 	public String readToString(Reader reader) throws IOException {
 
 		char[] arr = new char[8 * 1024];
-	    StringBuilder buffer = new StringBuilder();
-	    int numCharsRead;
-	    while ((numCharsRead = reader.read(arr, 0, arr.length)) != -1) {
-	        buffer.append(arr, 0, numCharsRead);
-	    }
+		StringBuilder buffer = new StringBuilder();
+		int numCharsRead;
+		while ((numCharsRead = reader.read(arr, 0, arr.length)) != -1) {
+			buffer.append(arr, 0, numCharsRead);
+		}
 
-	    return buffer.toString();
+		return buffer.toString();
 	}
-	
+
 	public boolean exists(String alias) throws SQLException {
 
 		String parameterizedSelectSQLQuery = selectSQLQuery + " and t.alias = ?";
-		
+
 		try (Connection connection = getConnection();
-				PreparedStatement preparedStatement = (PreparedStatement) connection.prepareStatement(parameterizedSelectSQLQuery)) {
+				PreparedStatement preparedStatement = (PreparedStatement) connection
+						.prepareStatement(parameterizedSelectSQLQuery)) {
 			int i = 1;
 			preparedStatement.setString(i++, alias);
 
 			try (ResultSet resultSet = preparedStatement.executeQuery()) {
 
 				return resultSet.isBeforeFirst();
-				
+
 			}
 
 		}
-		
+
 	}
 
 }
