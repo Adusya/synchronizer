@@ -158,13 +158,13 @@ public class DiskTool {
 			transformer.transform(source, result);
 
 		} catch (ParserConfigurationException pce) {
-			System.out.println(String.format("Can't edit tag %s in file %s. Cause: %s", tagName, fileName, pce.getMessage()));
+			System.out.println(String.format("Can't edit tag %s in file %s. ParserConfigurationException: %s", tagName, fileName, pce.getMessage()));
 		} catch (TransformerException tfe) {
-			System.out.println(String.format("Can't edit tag %s in file %s. Cause: %s", tagName, fileName, tfe.getMessage()));
+			System.out.println(String.format("Can't edit tag %s in file %s. TransformerException: %s", tagName, fileName, tfe.getMessage()));
 		} catch (IOException ioe) {
-			System.out.println(String.format("Can't edit tag %s in file %s. Cause: %s", tagName, fileName, ioe.getMessage()));
+			System.out.println(String.format("Can't edit tag %s in file %s. IOException: %s", tagName, fileName, ioe.getMessage()));
 		} catch (SAXException sae) {
-			System.out.println(String.format("Can't edit tag %s in file %s. Cause: %s", tagName, fileName, sae.getMessage()));
+			System.out.println(String.format("Can't edit tag %s in file %s. SAXException: %s", tagName, fileName, sae.getMessage()));
 		}
 
 	}
